@@ -3,7 +3,7 @@ import chess
 import copy
 
 from mesh import *
-layer_sizes = [68, 120, 100, 50, 25, 10, 1] # 64 + 4 
+layer_sizes = [64, 120, 100, 50, 25, 10, 1] # 64 + 4 
 
 class Position:
 
@@ -42,10 +42,39 @@ class Position:
 
     def evaluate(self, root):
 
-        self.mesh.setInputValues([])
-        # Input Fen to numeric and then push forward
-        root.evaluation = 0
+        input_values = self.fen_to_int_array(root.fen)
+        self.mesh.setInputValues(input_values)
+        self.mesh.pushForward()
+        root.evaluation = self.mesh.outputs()
 
+        print(root.evaluation)
+
+
+    def fen_to_int_array(self, fen):
+        master_count = 0
+        arr_index = 0
+        piece_ammounts = ['_', 'p','n','b','r','q','k','P','N','B','R','Q','K',]
+        int_arr = [0 for _ in range(64)]
+        FEN = str(fen).split('\'')[1]
+
+        while(FEN[master_count] != ' '):
+            char = FEN[master_count]
+
+            if(char != '/'):
+                if(char.isalpha()):
+                    int_arr[arr_index] = piece_ammounts.index(char)
+                    arr_index+=1
+                else:
+                    for _ in range(int(char)):
+                        int_arr[arr_index] = 0
+                        arr_index+=1
+            
+            master_count+=1
+
+        return int_arr
+        
+    def int_array_to_fen(self, int_arr):
+        return
 
 class Unit:
 
@@ -54,6 +83,7 @@ class Unit:
         self.position = position
         
 p = Position(0, None)
-p.generate_move_tree(p, 2)
-
+p.generate_move_tree(p, 1)
+p.evaluate(p.board)
+p.evaluate(p.children[0].board)
 print('Done')
